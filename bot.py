@@ -1,27 +1,19 @@
 from flask import Flask, request
 from telegram import Bot, Update
-import os
+from telegram.ext import Dispatcher, MessageHandler, filters, CallbackContext
 
-TOKEN = os.environ.get("BOT_TOKEN", "7961262765:AAFKtvksPxrCL_9eZ9Oe8fcHv4Z0e8-PkBQ")
+TOKEN = 'توکن ربات'
 bot = Bot(token=TOKEN)
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    return 'Bot is alive!'
-
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    try:
-        data = request.get_json(force=True)
-        update = Update.de_json(data, bot)
-
-        if update.message and update.message.text:
-            chat_id = update.message.chat.id
-            text = update.message.text
-            bot.send_message(chat_id=chat_id, text=f"پیام دریافت شد: {text}")
+    if request.method == "POST":
+        update = Update.de_json(request.get_json(force=True), bot)
+        dispatcher.process_update(update)
         return 'ok'
+
     except Exception as e:
         print(f"Error handling webhook: {e}")
         return 'error', 500
