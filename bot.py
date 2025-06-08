@@ -1,19 +1,19 @@
-# I'll now prepare a complete bot script in Python that the user can upload to a GitHub repository or deploy directly.
-bot_script = """
 # bot.py
 
-import os
 import requests
 from flask import Flask, request
 from telegram import Bot, Update
 from telegram.ext import Dispatcher, MessageHandler, Filters
 
 app = Flask(__name__)
-TOKEN = os.environ.get("BOT_TOKEN")
+
+# 🛡 توکن ربات شما
+TOKEN = '7961262765:AAFKtvksPxrCL_9eZ9Oe8fcHv4Z0e8-PkBQ'
+
 bot = Bot(token=TOKEN)
 dispatcher = Dispatcher(bot, None, workers=0, use_context=True)
 
-# Simple extractor using an unofficial public Instagram downloader (no API key needed)
+# 🔎 دانلود از اینستاگرام (پست یا ریلز عمومی)
 def extract_instagram_video(insta_url):
     try:
         api_url = "https://saveig.app/api/ajaxSearch"
@@ -30,9 +30,10 @@ def extract_instagram_video(insta_url):
         if result["links"]:
             return result["links"][0]["url"]
     except Exception as e:
-        print("Error extracting video:", e)
+        print("❌ Error extracting video:", e)
     return None
 
+# 📩 هندل پیام‌های دریافتی
 def handle_message(update, context):
     text = update.message.text
     if "instagram.com" in text:
@@ -43,7 +44,7 @@ def handle_message(update, context):
         else:
             update.message.reply_text("❌ متاسفانه نتونستم ویدیو رو پیدا کنم. لطفاً مطمئن شو لینک عمومی هست.")
     else:
-        update.message.reply_text("سلام! لینک پست یا ریلز اینستاگرام رو برام بفرست.")
+        update.message.reply_text("📥 لطفاً لینک پست یا ریلز اینستاگرام رو برام بفرست.")
 
 dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
 
@@ -55,17 +56,7 @@ def webhook():
 
 @app.route("/")
 def home():
-    return "ربات تلگرام فعال است."
+    return "✅ ربات تلگرام فعال است."
 
 if __name__ == "__main__":
     app.run(port=5000)
-"""
-
-requirements_txt = """
-python-telegram-bot==13.15
-Flask==2.3.2
-requests==2.31.0
-"""
-
-procfile_content = "web: python bot.py"
-
