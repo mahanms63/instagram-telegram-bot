@@ -5,7 +5,7 @@ import os
 app = Flask(__name__)
 
 BOT_TOKEN = os.environ.get("7961262765:AAFKtvksPxrCL_9eZ9Oe8fcHv4Z0e8-PkBQ")  # تنظیم از متغیر Railway
-BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
+BASE_URL = f"https://api.telegram.org/bot{7961262765:AAFKtvksPxrCL_9eZ9Oe8fcHv4Z0e8-PkBQ}"
 
 @app.route("/")
 def home():
