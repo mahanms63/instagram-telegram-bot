@@ -1,22 +1,20 @@
 # bot.py
-
+import os
 import requests
 from flask import Flask, request
 from telegram import Bot, Update
 from telegram.ext import Dispatcher, MessageHandler, Filters
 
+# توکن ربات: یا مستقیماً وارد کن یا در متغیر محیطی تنظیمش کن
+TOKEN = os.getenv("BOT_TOKEN", "7961262765:AAFKtvksPxrCL_9eZ9Oe8fcHv4Z0e8-PkBQ")
+
 app = Flask(__name__)
-
-# 🛡 توکن ربات شما
-TOKEN = '7961262765:AAFKtvksPxrCL_9eZ9Oe8fcHv4Z0e8-PkBQ'
-
 bot = Bot(token=TOKEN)
 dispatcher = Dispatcher(bot, None, workers=0, use_context=True)
 
-# 🔎 دانلود از اینستاگرام (پست یا ریلز عمومی)
+# تابع استخراج لینک ویدیو از API رایگان
 def extract_instagram_video(insta_url):
     try:
-        api_url = "https://saveig.app/api/ajaxSearch"
         headers = {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Origin": "https://saveig.app",
@@ -24,16 +22,15 @@ def extract_instagram_video(insta_url):
             "User-Agent": "Mozilla/5.0"
         }
         data = f"q={insta_url}&t=media"
-        response = requests.post(api_url, headers=headers, data=data)
-        response.raise_for_status()
+        response = requests.post("https://saveig.app/api/ajaxSearch", headers=headers, data=data)
         result = response.json()
-        if result["links"]:
+        if "links" in result and result["links"]:
             return result["links"][0]["url"]
     except Exception as e:
         print("❌ Error extracting video:", e)
     return None
 
-# 📩 هندل پیام‌های دریافتی
+# هندلر پیام
 def handle_message(update, context):
     text = update.message.text
     if "instagram.com" in text:
@@ -42,21 +39,24 @@ def handle_message(update, context):
         if video_url:
             context.bot.send_video(chat_id=update.effective_chat.id, video=video_url)
         else:
-            update.message.reply_text("❌ متاسفانه نتونستم ویدیو رو پیدا کنم. لطفاً مطمئن شو لینک عمومی هست.")
+            update.message.reply_text("❌ متاسفانه لینک ویدیو پیدا نشد. مطمئن شو پست عمومی باشه.")
     else:
-        update.message.reply_text("📥 لطفاً لینک پست یا ریلز اینستاگرام رو برام بفرست.")
+        update.message.reply_text("سلام! لطفاً لینک ریلز یا پست اینستاگرام رو بفرست.")
 
+# اتصال هندلر به دیسپچر
 dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
 
-@app.route("/webhook", methods=["POST"])
+# وب‌هوک برای دریافت پیام از تلگرام
+@app.route('/webhook', methods=['POST'])
 def webhook():
     update = Update.de_json(request.get_json(force=True), bot)
     dispatcher.process_update(update)
     return "ok"
 
-@app.route("/")
+# تست ساده برای اطمینان از اجرای درست
+@app.route('/')
 def home():
-    return "✅ ربات تلگرام فعال است."
+    return '✅ ربات فعال است.'
 
-if __name__ == "__main__":
-    app.run(port=5000)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
