@@ -2,7 +2,7 @@ from flask import Flask, request
 from telegram import Bot, Update
 from telegram.ext import Dispatcher, MessageHandler, filters, CallbackContext
 
-TOKEN = 'توکن ربات'
+TOKEN = '7961262765:AAFKtvksPxrCL_9eZ9Oe8fcHv4Z0e8-PkBQ'
 bot = Bot(token=TOKEN)
 
 app = Flask(__name__)
